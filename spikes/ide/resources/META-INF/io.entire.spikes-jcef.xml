@@ -1,0 +1,6 @@
+<idea-plugin>
+    <!-- The IDE loads this file only when it has the embedded browser. The service is how the spike can tell. -->
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="io.entire.spikes.JcefAvailable"/>
+    </extensions>
+</idea-plugin>

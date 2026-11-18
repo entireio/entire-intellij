@@ -1,0 +1,12 @@
+.gradle/
+.kotlin/
+.intellijPlatform/
+build/
+out/
+.idea/
+*.iml
+local.properties
+node_modules/
+webview/dist/
+.vitest/
+.DS_Store

@@ -1,0 +1,11 @@
+[
+  {"session_id": "11111111-2222-4333-8444-555555555555", "agent": "Claude Code", "model": "test-model", "status": "active", "kind": "interactive",
+   "started_at": "2026-03-01T09:00:00Z", "last_active": "2026-03-01T10:30:00+02:00", "turns": 12, "pending_turns": 3,
+   "last_checkpoint_id": "01HZXK3M5N7P9R2T4V6W8Y0A1B", "tokens": {"total": 15000, "input": 9000, "cache_read": 4000, "cache_write": 500, "output": 1500},
+   "last_prompt": "Rework the parser", "worktree": "/repo"},
+  {"session_id": "ses_made_up_2", "agent": "Codex", "status": "ended", "ended_at": "2026-02-27T18:00:00Z", "turns": 4.0, "tokens": {"total": "many"}},
+  {"session_id": "", "agent": "No ID"},
+  {"agent": "Missing ID"},
+  "not an object",
+  {"session_id": "ses_made_up_3", "agent": "", "model": 7, "status": null, "turns": "5", "pending_turns": "2", "tokens": [], "last_prompt": ""}
+]

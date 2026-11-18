@@ -1,0 +1,7 @@
+<idea-plugin>
+    <!-- The IDE loads this file only when it has the embedded browser. Without it a panel tab says what is missing. -->
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceInterface="io.entire.intellij.editor.PanelViewFactory"
+                            serviceImplementation="io.entire.intellij.jcef.JcefPanelViewFactory"/>
+    </extensions>
+</idea-plugin>

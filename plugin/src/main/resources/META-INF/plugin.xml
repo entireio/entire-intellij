@@ -1,0 +1,60 @@
+<idea-plugin>
+    <!-- This ID cannot change after the first upload to JetBrains Marketplace. -->
+    <id>io.entire.explorer</id>
+    <name>Entire</name>
+    <vendor url="https://entire.com">Entire</vendor>
+    <description><![CDATA[
+        <p>Browse the <a href="https://entire.com">Entire</a> checkpoints behind your commits, the agent sessions behind each checkpoint, and the trails of a repository on entire.com, in the IDE where you read the code.</p>
+        <ul>
+            <li><b>Checkpoints and sessions:</b> the checkpoints of each commit, the sessions behind them, and their transcripts, in an editor tab.</li>
+            <li><b>Search:</b> filter the rows a tab has loaded, or search Entire for commits, checkpoints, and sessions on every branch.</li>
+            <li><b>Trails and the brain:</b> the trails of a repository on entire.com, and what its brain holds.</li>
+            <li><b>Setup:</b> install the Entire CLI, log in, enable Entire, and build the graph and the brain, one step at a time.</li>
+        </ul>
+        <p>The plugin reads through Git and the <a href="https://docs.entire.com/installation">Entire CLI</a>, and it sends no network requests of its own. Only the steps of the Setup tab change anything, and each one runs when you click it and shows its command first.</p>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <!-- Git4Idea builds on the classes of com.intellij.dvcs. In 2026.3 they are in the bundled plugin Version Control, which has this alias. -->
+    <depends>com.intellij.modules.vcs</depends>
+    <depends>Git4Idea</depends>
+    <!-- The panels need the embedded browser. Without it the plugin still loads, and a panel shows what it can. -->
+    <depends optional="true" config-file="io.entire.explorer-jcef.xml">com.intellij.modules.jcef</depends>
+
+    <resource-bundle>messages.EntireBundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Entire"
+                    anchor="left"
+                    icon="/icons/toolWindowEntire.svg"
+                    factoryClass="io.entire.intellij.toolwindow.EntireToolWindowFactory"/>
+        <!-- A panel tab is a file in this file system, so the IDE can bring the tab back after a restart. -->
+        <virtualFileSystem key="entire-panel" implementationClass="io.entire.intellij.editor.EntirePanelFileSystem"/>
+        <fileEditorProvider implementation="io.entire.intellij.editor.EntirePanelEditorProvider"/>
+        <editorTabTitleProvider implementation="io.entire.intellij.editor.PanelTabTitle"/>
+        <!-- The page is under Tools. Its values are the IDE's, and not one project's. -->
+        <applicationConfigurable parentId="tools"
+                                 id="io.entire.explorer.settings"
+                                 instance="io.entire.intellij.settings.EntireConfigurable"
+                                 bundle="messages.EntireBundle"
+                                 key="settings.title"/>
+        <notificationGroup id="Entire"
+                           displayType="BALLOON"
+                           bundle="messages.EntireBundle"
+                           key="notification.group.entire"/>
+    </extensions>
+
+    <projectListeners>
+        <!-- The tool window shows only in a project with a Git repository. A change of the VCS roots can add or remove one. -->
+        <listener class="io.entire.intellij.toolwindow.GitRootsListener" topic="com.intellij.openapi.vcs.VcsListener"/>
+    </projectListeners>
+
+    <actions>
+        <action id="Entire.Refresh" class="io.entire.intellij.actions.RefreshAction" icon="AllIcons.Actions.Refresh"/>
+        <action id="Entire.Settings" class="io.entire.intellij.actions.SettingsAction" icon="AllIcons.General.Settings"/>
+        <action id="Entire.Setup" class="io.entire.intellij.actions.SetupAction" icon="AllIcons.Actions.Install"/>
+        <action id="Entire.OpenRepoOnWeb" class="io.entire.intellij.actions.OpenRepoOnWebAction" icon="AllIcons.General.Web"/>
+        <action id="Entire.ViewBrain" class="io.entire.intellij.actions.ViewBrainAction" icon="AllIcons.Graph.Layout"/>
+        <action id="Entire.StopBrainGraph" class="io.entire.intellij.actions.StopBrainGraphAction" icon="AllIcons.Actions.Suspend"/>
+    </actions>
+</idea-plugin>

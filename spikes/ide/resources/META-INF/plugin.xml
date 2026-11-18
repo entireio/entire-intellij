@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>io.entire.spikes</id>
+    <name>Entire Spikes</name>
+    <version>0.0.1</version>
+    <vendor>Entire</vendor>
+    <idea-version since-build="253.29346"/>
+    <description>Answers design questions for the Entire plugin inside a running IDE. It is not shipped.</description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.vcs</depends>
+    <depends>Git4Idea</depends>
+    <!-- The checks read what the plugin's own panel holds. -->
+    <depends>io.entire.explorer</depends>
+    <!-- The same optional dependency the real plugin declares. -->
+    <depends optional="true" config-file="io.entire.spikes-jcef.xml">com.intellij.modules.jcef</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="io.entire.spikes.SpikeActivity"/>
+        <virtualFileSystem key="entire-spike-panel" implementationClass="io.entire.spikes.SpikePanelFileSystem"/>
+        <fileEditorProvider implementation="io.entire.spikes.SpikePanelEditorProvider"/>
+    </extensions>
+</idea-plugin>
