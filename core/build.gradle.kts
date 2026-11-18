@@ -35,7 +35,7 @@ tasks.test {
 
 // A program that prints what the plugin would know about a real repository.
 // scripts/parity.sh compares its output with what entire-vscode's own code reads.
-val smoke: SourceSet by sourceSets.creating {
+val smoke: SourceSet = sourceSets.create("smoke") {
     compileClasspath += sourceSets.main.get().output + sourceSets.main.get().compileClasspath
     runtimeClasspath += output + sourceSets.main.get().output + configurations.testRuntimeClasspath.get()
 }

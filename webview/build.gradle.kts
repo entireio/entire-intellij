@@ -6,14 +6,14 @@ plugins {
 
 val npm = if (System.getProperty("os.name").lowercase().contains("windows")) "npm.cmd" else "npm"
 
-val npmCi by tasks.registering(Exec::class) {
+val npmCi = tasks.register<Exec>("npmCi") {
     description = "Installs the npm dependencies of the panel pages from the lock file."
     inputs.files("package.json", "package-lock.json")
     outputs.file("node_modules/.package-lock.json")
     commandLine(npm, "ci", "--no-audit", "--no-fund")
 }
 
-val bundle by tasks.registering(Exec::class) {
+val bundle = tasks.register<Exec>("bundle") {
     description = "Builds panel.js, panel.css, shim.js, and the list of theme variables into dist."
     dependsOn(npmCi)
     inputs.dir("src")
@@ -22,7 +22,7 @@ val bundle by tasks.registering(Exec::class) {
     commandLine(npm, "run", "bundle")
 }
 
-val webviewCheck by tasks.registering(Exec::class) {
+val webviewCheck = tasks.register<Exec>("webviewCheck") {
     description = "Type-checks the panel pages and runs their tests."
     dependsOn(npmCi)
     inputs.dir("src")
@@ -40,7 +40,7 @@ tasks.named<Delete>("clean") {
 }
 
 // What :plugin puts into its resources.
-val bundleElements: Configuration by configurations.creating {
+val bundleElements: Configuration = configurations.create("bundleElements") {
     isCanBeConsumed = true
     isCanBeResolved = false
 }

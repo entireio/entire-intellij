@@ -19,7 +19,7 @@ kotlin {
 val releaseChannel = version.toString().substringAfter('-', "").substringBefore('.').ifEmpty { "default" }
 
 // The built panel pages, from :webview.
-val webviewBundle: Configuration by configurations.creating {
+val webviewBundle: Configuration = configurations.create("webviewBundle") {
     isCanBeConsumed = false
     isCanBeResolved = true
 }
@@ -63,6 +63,11 @@ tasks.processResources {
 }
 
 intellijPlatform {
+    // Instrumentation adds null checks to Java classes and compiles GUI Designer
+    // forms. The plugin has neither, since Kotlin writes its own null checks, and
+    // the task uses Gradle's Ant builder, which Gradle 10 removes.
+    instrumentCode = false
+
     pluginConfiguration {
         ideaVersion {
             // 2025.3.1 is the first build with the com.intellij.modules.jcef alias.
