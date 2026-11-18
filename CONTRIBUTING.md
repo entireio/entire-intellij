@@ -4,13 +4,7 @@
 
 The build needs Node 22.18 or later on the `PATH`. Gradle downloads JDK 21 when the machine has none.
 
-The repository does not hold the Gradle wrapper yet. Generate it once with Gradle 9.0 or later:
-
-```sh
-gradle wrapper --gradle-version 9.9.1
-```
-
-After that:
+The repository holds the Gradle wrapper, so the build needs no Gradle of its own:
 
 ```sh
 ./gradlew check                 # compile every module, run the JVM tests, type-check and test the panel pages
