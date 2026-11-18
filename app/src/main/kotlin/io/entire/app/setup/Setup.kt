@@ -108,8 +108,9 @@ fun setupSteps(facts: SetupFacts, options: SetupOptions, host: SetupHost): List<
 
     // 1. The CLI. An update goes the way the CLI was installed: Homebrew only for a CLI that Homebrew put there.
     val update = facts.cliState == CliState.TOO_OLD
-    val brewPrefix = host.brew?.let { java.io.File(it).parentFile?.parentFile?.path }
-    val viaHomebrew = host.brew != null && (!update || (brewPrefix != null && facts.cliPath?.startsWith(brewPrefix) == true))
+    // Homebrew runs on macOS and Linux, so its paths use '/' on whatever machine reads them: /opt/homebrew/bin/brew has the prefix /opt/homebrew.
+    val brewPrefix = host.brew?.substringBeforeLast('/', "")?.substringBeforeLast('/', "")?.takeIf { it.isNotEmpty() }
+    val viaHomebrew = host.brew != null && (!update || (brewPrefix != null && facts.cliPath?.startsWith("$brewPrefix/") == true))
     val installer = installCli(host.os, if (viaHomebrew) host.brew else null, update)
     val viaBrew = installer.program == host.brew
     steps.add(
