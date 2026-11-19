@@ -71,7 +71,8 @@ build() {
   mkdir -p "$out/entire/webview"
   cp "$repo"/webview/dist/* "$out/entire/webview/"
   # Gradle writes the version and the build range into plugin.xml. This does the same by hand.
-  sed 's|<name>Entire</name>|<name>Entire</name><version>0.1.0</version><idea-version since-build="253.29346" until-build="263.*"/>|' \
+  version=$(sed -n 's/^version *= *//p' "$repo/gradle.properties")
+  sed "s|<name>Entire</name>|<name>Entire</name><version>$version</version><idea-version since-build=\"253.29346\" until-build=\"263.*\"/>|" \
     "$repo/plugin/src/main/resources/META-INF/plugin.xml" > "$out/entire/META-INF/plugin.xml"
   (cd "$out/entire" && zip -qr "$sandbox/p/entire-intellij/lib/entire-intellij.jar" .)
 
