@@ -1,0 +1,106 @@
+name: Release
+
+# A pushed tag such as v0.1.2 publishes that version to JetBrains Marketplace
+# and as a GitHub release. CONTRIBUTING.md says how to cut one.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # Entire's plugin number on JetBrains Marketplace.
+  MARKETPLACE_PLUGIN: 36279
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The whole history, so the next step can tell whether the tag is on main.
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: webview/package-lock.json
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Check the tag
+        id: version
+        run: |
+          version=$(sed -n 's/^version *= *//p' gradle.properties)
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::The tag $GITHUB_REF_NAME does not name the version in gradle.properties, $version."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::The tag $GITHUB_REF_NAME is not on main."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Read the release notes
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # The lines under "## <version> (<date>)", up to the next heading of that level.
+          awk -v version="$VERSION" '/^## / { if (found) exit; found = ($2 == version); next } found' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          if ! grep -q '[^[:space:]]' "$RUNNER_TEMP/notes.md"; then
+            echo "::error::CHANGELOG.md has no section for $VERSION."
+            exit 1
+          fi
+
+      - name: Check and build
+        run: ./gradlew check :plugin:verifyPlugin :plugin:buildPlugin
+
+      # Signing is left to the Marketplace, so no signing variables are set here.
+      # A secret that does not exist would arrive as an empty variable, which
+      # the build would take for a signing key.
+      - name: Publish to JetBrains Marketplace
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          PUBLISH_TOKEN: ${{ secrets.INTELLIJ_PLUGIN_DEPLOY_TOKEN }}
+        run: |
+          listed=$(curl -fsS --retry 3 "https://plugins.jetbrains.com/api/plugins/$MARKETPLACE_PLUGIN/updates?size=100" \
+            | jq --arg version "$VERSION" 'any(.[]; .version == $version)')
+          if [ "$listed" = true ]; then
+            echo "::notice::JetBrains Marketplace already lists $VERSION, so this run does not upload it."
+          elif [ -z "$PUBLISH_TOKEN" ]; then
+            echo "::error::The repository secret INTELLIJ_PLUGIN_DEPLOY_TOKEN is not set."
+            exit 1
+          else
+            ./gradlew :plugin:publishPlugin
+          fi
+
+      - name: Create the GitHub release
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          zip="$RUNNER_TEMP/entire-intellij-$VERSION.zip"
+          cp "plugin/build/distributions/plugin-$VERSION.zip" "$zip"
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$zip" --clobber
+          else
+            prerelease=()
+            if [[ "$VERSION" == *-* ]]; then
+              prerelease=(--prerelease)
+            fi
+            gh release create "$GITHUB_REF_NAME" "$zip" --verify-tag --title "$VERSION" \
+              --notes-file "$RUNNER_TEMP/notes.md" "${prerelease[@]}"
+          fi
