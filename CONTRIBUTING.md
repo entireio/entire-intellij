@@ -37,7 +37,16 @@ npm run bundle   # write panel.js, panel.css, shim.js, and theme-variables.json 
 
 ## The Panel Pages
 
-`webview/src/webview`, `webview/src/shared`, `webview/src/core`, and `webview/test/webview` are copies of files in [entire-vscode](https://github.com/entireio/entire-vscode). [PORTING.md](PORTING.md) lists them. Do not edit a copy for this plugin's sake: put what the IDE needs in `webview/src/bridge`. The panel script asks for its host with `acquireVsCodeApi()`, and `bridge.ts` answers it.
+`webview` holds files copied without a change from [entire-vscode](https://github.com/entireio/entire-vscode) at commit `8440828218f2ae3de22fafcd64d983de025341e0`:
+
+| entire-vscode | Here |
+| --- | --- |
+| `src/webview/*` (7 files) | `webview/src/webview/` |
+| `src/shared/protocol.ts` | `webview/src/shared/` |
+| `src/core/format.ts`, `schemas.ts`, `trails.ts` | `webview/src/core/` |
+| `test/webview/app.test.ts`, `dom.test.ts`, `markdown.test.ts`, `trail.test.ts` | `webview/test/webview/` |
+
+Do not edit a copy for this plugin's sake, so that a later change in entire-vscode can be copied over it. Put what the IDE needs in `webview/src/bridge`. The panel script asks for its host with `acquireVsCodeApi()`, and `bridge.ts` answers it. `scripts/upstream-diff.sh [path-to-entire-vscode]` prints how the copies differ from a checkout of entire-vscode, and prints nothing when they are the same.
 
 The plugin writes `panel.css`, `shim.js`, and `panel.js` into one HTML document as inline elements. The build fails when one of them contains a closing `script` or `style` tag, because an inline element ends at the first one.
 
@@ -57,7 +66,7 @@ The check covers what the repositories happen to contain. It does not replace th
 
 ## Trying the Plugin in an IDE
 
-Until the Gradle build runs, `spikes/ide/run.sh` is the way to see the plugin in an IDE. It compiles the plugin with the IDE's own Kotlin compiler and starts the IDE in a sandbox that has its own settings:
+`./gradlew :plugin:runIde` starts IntelliJ IDEA 2025.3.1 with the plugin loaded. The in-IDE checks use `spikes/ide/run.sh` instead. It compiles the plugin without Gradle, with the Kotlin compiler of an installed IDE, and starts that IDE in a sandbox that has its own settings:
 
 ```sh
 spikes/ide/run.sh <sandbox-directory> show "/Applications/IntelliJ IDEA.app" <copy-of-a-repository>
@@ -86,3 +95,16 @@ spikes/ide/run.sh <sandbox-directory> all "/Applications/IntelliJ IDEA.app"
 The script needs neither Gradle nor a Gradle wrapper, and it leaves the IDE's real settings alone. The spike plugin does nothing unless the IDE starts with `-Dentire.spike.out`, which the script sets.
 
 Record the result in [docs/spikes.md](docs/spikes.md), with the operating system, the IDE version, and the Java runtime it ran on.
+
+## Releasing
+
+1. In a pull request, set `version` in `gradle.properties`, and add a section for that version at the top of [CHANGELOG.md](CHANGELOG.md), headed `## <version> (<date>)`.
+2. After the pull request merges, tag the merge commit and push the tag:
+
+   ```sh
+   git fetch origin
+   git tag v0.1.2 origin/main
+   git push origin v0.1.2
+   ```
+
+The tag starts the Release workflow, `.github/workflows/release.yml`. It checks that the tag names the version in `gradle.properties` and is on `main`, runs `check` and the Plugin Verifier, and uploads the plugin to [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/36279-entire) with the repository secret `INTELLIJ_PLUGIN_DEPLOY_TOKEN`. Then it creates a GitHub release with the zip and the version's section of the changelog. When the Marketplace already lists the version, the workflow skips the upload and still creates the GitHub release. A version with a suffix, such as `0.2.0-eap.1`, goes to the Marketplace's `eap` channel and makes a GitHub prerelease.

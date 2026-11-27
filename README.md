@@ -2,7 +2,7 @@
 
 Browse the [Entire](https://entire.com) checkpoints behind your commits, the agent sessions behind each checkpoint, and the trails of a repository on entire.com, in the IDE where you read the code.
 
-This plugin is the JetBrains counterpart of [Entire for VS Code](https://github.com/entireio/entire-vscode). It is in development and has no release yet. [PORTING.md](PORTING.md) tracks what is ported.
+This plugin is the JetBrains counterpart of [Entire for VS Code](https://github.com/entireio/entire-vscode), and it is on [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/36279-entire). [CHANGELOG.md](CHANGELOG.md) lists what each release changes.
 
 ## Requirements
 
@@ -14,15 +14,11 @@ This plugin is the JetBrains counterpart of [Entire for VS Code](https://github.
 
 ## Installation
 
-The plugin has no release on JetBrains Marketplace yet, so you build it from this repository. The build needs Node 22.18 or later on the `PATH`, and Gradle downloads JDK 21 when the machine has none.
+In the IDE, open Settings > Plugins, search the Marketplace tab for Entire, and click Install. Then open a project in a Git repository, and open View > Tool Windows > Entire. When the Entire CLI is missing or Entire is not enabled in the repository, the Setup tab comes first and sets them up.
 
-```sh
-./gradlew :plugin:buildPlugin
-```
+Each [release on GitHub](https://github.com/entireio/entire-intellij/releases) also carries the plugin's zip. To install it, open Settings > Plugins, click the gear button, choose Install Plugin from Disk…, and select the zip.
 
-In the IDE, open Settings > Plugins, click the gear button, choose Install Plugin from Disk…, and select the zip that the build wrote to `plugin/build/distributions`. Then open a project in a Git repository, and open View > Tool Windows > Entire. When the Entire CLI is missing or Entire is not enabled in the repository, the Setup tab comes first and sets them up.
-
-To try the plugin without installing it, `./gradlew :plugin:runIde` starts a separate IDE with the plugin loaded. [CONTRIBUTING.md](CONTRIBUTING.md) covers the rest of the build.
+To build the plugin from this repository, run `./gradlew :plugin:buildPlugin`, which writes the zip to `plugin/build/distributions`. The build needs Node 22.18 or later on the `PATH`, and Gradle downloads JDK 21 when the machine has none. `./gradlew :plugin:runIde` starts a separate IDE with the plugin loaded. [CONTRIBUTING.md](CONTRIBUTING.md) covers the rest of the build.
 
 ## What Works Today
 
